@@ -34,6 +34,7 @@
 **Python gui/cli**
 
     Use the provided python fiel to run the gui/cli
+    python3 ddr_test_gui_v1.py
     
     
      
