@@ -1,9 +1,9 @@
-* Description:
+*Description*:
    This module acts as the primary top-level structural wrapper layer. It
   implements a dedicated Staging Buffer Architecture designed to isolate 
    slow asynchronous serial lines (UART) from a high-frequency system bus.
 
-**   Operational Flow:
+**Operational Flow**
      1. Write: Serial bytes are collected slowly into a 2KB Staging BRAM.
         Once a burst finishes, the AXI Master Mover blasts the entire packet
        onto the high-speed AXI fabric at 80 MHz in a single burst.
@@ -11,7 +11,7 @@
        memory into the Staging Buffer RAM, which then streams data back 
         to the host utility over UART.
 
-**  Dependencies:
+**Dependencies**
    - FCCC_C0               (SmartFusion2 Native Hard-IP Clock Block)
    - uart_rx / uart_tx     (Physical Line Serialization Controllers)
    - ram_2k_true_dual_port (Dual-Access Asymmetric Bridge RAM Layout)
@@ -19,19 +19,19 @@
    - axi4_master_data_mover(High-Speed AXI4 Burst Controller Engine)
    - axi_ram               (Alex Forencich System Memory Emulation target)
 
-** Revision History:
+**Revision History**:
    v1.0 - Baseline 2KB hardcoded burst system loop.
    v2.0 - Added dynamic 16-bit word length parameters handshake tracking.
    v3.0 - Integrated 64-bit AXI4 Full Master pipeline & True Dual-Port BRAM.
    v3.1 - Converted to 5-bit width FCCC-sync state tracking matrices.
 
 
-* Libero Project
+**Libero Project**
      Create the libero project targting m2s025-vf256 .
      Import hdl files and the IP core ( FCC)
      test bench is also provded.
      
-** Python gui/cli
+**Python gui/cli**
 
     Use the provided python fiel to run the gui/cli
     
