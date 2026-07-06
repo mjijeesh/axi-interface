@@ -1,0 +1,109 @@
+//------------------------------------------------------------------------------
+// Company/Institution:  Tecnomic Components
+// Engineer:             Jijeesh M
+// 
+// Create Date:          2026
+// Module Name:          ram_2k_true_dual_port
+// Project Name:         RTG4/SmartFusion2 Serial to AXI Memory Staging System
+// Target Devices:       Microchip SmartFusion2 / RTG4 Fabric Core Architecture
+// Tool Versions:        Libero SoC Design Suite v12.0+
+//
+// Description:
+//   A synthesizable, true dual-port block RAM staging buffer. Configured with a 
+//   depth of 256 addresses and a width of 64 bits per row, providing exactly 
+//   2 Kilobytes (16,384 bits) of local block storage space.
+//
+//   This memory serves as the critical timing boundary interface link connecting
+//   the slow serial execution domain and the high-speed system bus.
+//
+//   Port Assignment Architecture:
+//     - Port A: Connected strictly to the system_control_fsm module. It collects
+//               slow asynchronous incoming bytes from the UART lines or streams
+//               cached data back out over the serial wire line.
+//     - Port B: Connected strictly to the high-speed axi4_master_data_mover
+//               engine. It drives full 64-bit parallel data words onto the AXI
+//               bus layout fabric at full clock velocity.
+//
+//   Synthesis/Hardware Notes:
+//     - The (* RAM_STYLE="BLOCK" *) synthesis attribute forces Libero Synplify
+//       to map this logic directly into physical hardware Large SRAM (LSRAM) 
+//       blocks inside the SmartFusion2/RTG4 die instead of wasting fabric LUTs.
+//     - This memory utilizes synchronous "Read-First" / "Old-Data" behavior. If
+//       a w//       was present *prior* to the write edge, avoiding internal bus racing.
+//
+// Dependencies:
+//   None (Primitive block level memory array layer)
+//
+// Revision History:
+//   v1.0 - Baseline dual-port execution layer.
+//   v2.0 - Added Synplify block layout compiler tags and strict net definitions.
+//------------------------------------------------------------------------------
+
+`resetall
+`timescale 1ns / 1ps
+`default_nettype none
+
+module ram_2k_true_dual_port (
+    //--------------------------------------------------------------------------
+    // Unified Core Clock Input
+    //--------------------------------------------------------------------------
+    input  wire         clk,       // Main global fabric execution clock (80 MHz)
+    
+    //--------------------------------------------------------------------------
+    // Port A Bus Interface Channels (Wired to UART Handshake Protocol FSM Core)
+    //--------------------------------------------------------------------------
+    input  wire         we_a,      // Port A Active-High Write Enable strobe flag
+    input  wire  [7:0]  addr_a,    // Port A 8-bit pointer address index (256 depth)
+    input  wire  [63:0] wdata_a,   // Port A 64-bit parallel incoming write payload data
+    output reg   [63:0] rdata_a,   // Port A 64-bit parallel synchronous output read data
+    
+    //--------------------------------------------------------------------------
+    // Port B Bus Interface Channels (Wired to High-Speed AXI Master Engine)
+    //--------------------------------------------------------------------------
+    input  wire         we_b,      // Port B Active-High Write Enable strobe flag
+    input  wire  [7:0]  addr_b,    // Port B 8-bit pointer address index (256 depth)
+    input  wire  [63:0] wdata_b,   // Port B 64-bit parallel incoming write payload data
+    output reg   [63:0] rdata_b    // Port B 64-bit parallel synchronous output read data
+);
+
+    //--------------------------------------------------------------------------
+    // Memory Array Vector Grid Declaration
+    //--------------------------------------------------------------------------
+    // Enforces strict implementation mapping to embedded hardware LSRAM blocks
+    (* ramstyle = "block" *) reg [63:0] dual_port_mem [255:0];
+
+    //--------------------------------------------------------------------------
+    // Port A Operations Latch Block (UART Interface Domain)
+    //--------------------------------------------------------------------------
+    always @(posedge clk) begin
+        if (we_a) begin
+            dual_port_mem[addr_a] <= wdata_a;
+        end
+        // Non-blocking read assignment ensures a Read-First/Old-Data behavior during write
+        rdata_a <= dual_port_mem[addr_a];
+    end
+
+    //--------------------------------------------------------------------------
+    // Port B Operations Latch Block (AXI Master Interface Domain)
+    //--------------------------------------------------------------------------
+    always @(posedge clk) begin
+        if (we_b) begin
+            dual_port_mem[addr_b] <= wdata_b;
+        end
+        // Non-blocking read assignment ensures a Read-First/Old-Data behavior during write
+        rdata_b <= dual_port_mem[addr_b];
+    end
+
+    //--------------------------------------------------------------------------
+    // Hardware Power-On/Simulation Memory Initialization Loop
+    //--------------------------------------------------------------------------
+    integer i;
+    initial begin
+        // Completely zeroes out the BRAM grid at startup to avoid undefined 'x' states
+        for (i = 0; i < 256; i = i + 1) begin
+            dual_port_mem[i] = 64'h0000000000000000;
+        end
+    end
+
+endmodule
+`resetall

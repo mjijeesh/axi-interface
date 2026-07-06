@@ -1,0 +1,14 @@
+Microchip Technology Inc. - Microchip Libero Software Release 2025.2 (Version 2025.2.0.14)
+
+Date      :  Wed Jul  1 12:08:16 2026
+Project   :  /home/jijeesh/projects/m2s-creative/ddr_test_gui_v1
+Component :  FCCC_C0
+Family    :  SmartFusion2
+
+
+HDL source files for all Synthesis and Simulation tools:
+    /home/jijeesh/projects/m2s-creative/ddr_test_gui_v1/component/work/FCCC_C0/FCCC_C0_0/FCCC_C0_FCCC_C0_0_FCCC.v
+    /home/jijeesh/projects/m2s-creative/ddr_test_gui_v1/component/work/FCCC_C0/FCCC_C0.v
+
+Constraint files:
+    /home/jijeesh/projects/m2s-creative/ddr_test_gui_v1/component/work/FCCC_C0/FCCC_C0_0/FCCC_C0_FCCC_C0_0_FCCC.sdc
