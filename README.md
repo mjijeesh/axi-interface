@@ -1,259 +1,198 @@
-## Microchip Libero SoC & ModelSim/QuestaSim Automation Pipeline
+# **Microchip Libero SoC & QuestaSim Automation Pipeline User Guide**
 
-An advanced, highly modular Python automation framework designed to streamline and accelerate the digital design workflow for Microchip FPGAs (**SmartFusion2**, **RTG4**, and **PolarFire**). This script (`build.py`) acts as a unified command-line orchestrator that automates headless project creation, clock Conditioning Infrastructure (FCCC IP Core) generation, design constraint validation, complete hardware implementation (Synthesis through Place & Route), direct device programming, and high-performance sandboxed behavioral simulation.
+**Company/Institution:** Tecnomic Components 
 
-🚀 Key Features
+**Engineer:** Automated Flow Engine
 
-* **Headless Project Provisioning:** Generates unified, deterministic Libero SoC projects programmatically via Tcl generation, enforcing corporate Default I/O Signaling Rules (e.g., `LVCMOS 3.3V` / `1.8V`).  
-* **Deterministic Bottom-Up Compilation Tree:** Automatically scans design files and guarantees top-level architectures (`top.v` or `fpga_top.v`) compile last, preventing module dependency errors.  
-* **Fail-Fast Constraint Auditing:** Explicitly verifies pin placements and timing constraints (`.pdc` and `.sdc`) before initiating lengthy vendor tool execution loops.  
-* **Sandboxed Workspace Isolation:**  
-  * **Hardware Logic:** Contained strictly within `build/<target_family>/top/`.  
-  * **Simulation Environment:** Contained strictly within an isolated sandbox `build/<target_family>/sim/`, ensuring zero repository root pollution.  
-* **Blazing Fast Direct Simulator Interfacing:** Bypasses sluggish Libero GUI initialization entirely by compiling project sources directly in **QuestaSim/ModelSim** via custom-generated `run.do` macro files.  
-* **Pure Terminal Console Mode Execution:** Provides a true text-only non-interactive execution mode (`-c -batch` parameters) with automated error trapping (`onerror {quit -force}`) to pass simulation logs directly to your standard output stream.  
-* **On-Demand VCD Trace Dumps:** Generates absolute, clean Value Change Dump (`.vcd`) waveform profiles hierarchically to power headless profiling or external waveform view loops (e.g., GTKWave).
+**Release Year:** 2026
 
-📂 Project Directory Structure
+**Target Hardware:** Microchip SmartFusion2, RTG4, and PolarFire FPGAs
 
-To operate seamlessly, the automation launcher script expects the following structural repository tree:
+**Associated Automation Script:** `build.py`
 
-TXT  
-Plaintext
+## **1\. Overview**
 
-```
-├── src/
-│   ├── hdl/                <-- All parallel Verilog design modules
-│   ├── stimulus/           <-- Testbenches & simulation modules (Accepts 'stimilas')
-│   └── constraints/
-│       ├── smartfusion2/   <-- Folder channels: io/top_io.pdc, fp/top_fp.pdc, sdc/top.sdc
-│       ├── rtg4/           <-- Space-grade constraints path layouts 
-│       └── polarfire/      <-- Low-power architecture constraints layouts 
-└── build.py                <-- Master Automation & Workflow Orchestrator Launcher 
-```
+The `build.py` Python script is a robust, modularized, command-line utility designed to automate, sand-box, and orchestrate the development lifecycle of Microchip FPGAs. It manages two main workflows:
 
-⚙️ Command-Line Interface (CLI) Specification
+1. **Hardware Compilation Pipeline (`--build` / `--program`):** Creates an isolated Libero project, imports design files and constraint files, sources target-specific custom hardware components (such as DDR, PLL/FCCC controllers), runs synthesis and layouts, and exports the final trusted facility programming bitstreams.  
+2. **Behavioral Verification Pipeline (`--sim`):** Dynamically extracts generated IP modules and project design wrappers out of the Libero database, sorts them bottom-up in perfect architectural dependency order, compiles all project assets, and launches QuestaSim/ModelSim cleanly in either CLI interactive mode or GUI mode with no elaboration timing delays.
 
-To dynamically manage design configurations, pass standard options to the orchestrator:
+## **2\. Directory Layout Schema**
 
-Bash
+To run the master script, your project folder structure must match this layout. This strict layout ensures that builds remain completely sandboxed, allowing multiple target device builds to coexist cleanly on the same machine without file-lock collisions.
 
 ```
-python3 build.py --family <target> [mode_switch] [runtime_overrides]
+<project_root>/
+├── build.py                             # Master automation orchestrator script
+├── src/                                 # Central Source Repository
+│   ├── hdl/                             # All design RTL modules (*.v)
+│   │   ├── fpga_top.v
+│   │   ├── axi_master_if.v
+│   │   └── ...
+│   ├── stimulus/                        # Testbench modules (*.v)
+│   │   └── tb_top_axi.v
+│   ├── constraints/                     # Target-specific physical mapping
+│   │   ├── smartfusion2/
+│   │   ├── polarfire/
+│   │   └── rtg4/
+│   │       ├── io/top_io.pdc            # I/O pin assignments
+│   │       ├── fp/top_fp.pdc            # Floorplanning / Placement rules
+│   │       └── sdc/top.sdc              # Design Timing constraints
+│   └── tcl/                             # Sub-system instantiation TCLs
+│       ├── FDDRC_With_INIT_recursive.tcl # General sub-system TCL script (fallback)
+│       ├── smartfusion2/                # Target-specific SmartFusion2 TCL scripts
+│       ├── polarfire/                   # Target-specific PolarFire TCL scripts
+│       └── rtg4/                        # Target-specific RTG4 TCL scripts
+│           └── FDDRC_With_INIT_recursive.tcl
+│
+└── build/                               # Dynamic Build Output (Auto-Generated)
+    ├── run_project_<target>.tcl         # Master Libero workspace build script
+    └── <target_family>/                 # Sandboxed target workspace folder
+        ├── top/                         # Libero Database Sandbox (contains top.prjx)
+        │   ├── component/work/          # Auto-generated IP source codes
+        │   └── ...
+        └── sim/                         # Simulator Sandbox (contains compile databases)
+            ├── run.do                   # QuestaSim macro file (auto-generated)
+            └── presynth/                # Compiled logical simulation libraries
 ```
 
-### Core Architecture Switch (Mandatory)
+## **3\. Script Features & Solved Constraints**
 
-* **`--family {smartfusion2, polarfire, rtg4}`**: Selects the target hardware fabric template database, signaling voltage parameters, default I/O standards, and clock IP core naming versions.
+* **Bottom-Up Compilation Ordering:** Standard directories contain circular file listings. This script crawls generated components recursively and compiles deepest leaf-submodules first (e.g., compiling nested PLLs and physical layers before outer wrappers) to avoid `module not defined` compiler warnings.  
+* **Auto-Bypass Duplicate IPs:** The script detects if you are sourcing a custom sub-system TCL file that generates a global clocking network. If it is active, it automatically suppresses Libero's default FCCC core generator (`FCCC_C0`) to prevent dual-definition elaboration aborts.  
+* **Timing Resolution Hard-Alignment:** Microchip precompiled simulation primitives are compiled with a time step of $1\\text{ ps}$. The script overrides QuestaSim's default $1\\text{ fs}$ launch parameter to $-t\\text{ 1ps}$ globally, preventing severe delay calculation rounding mismatch aborts.  
+* **Headless/GUI Workspace Binding:** In GUI mode, the script forces graphical thread initializes via `-gui` and prepends directory locks inside `run.do` (`cd "<path>"`), allowing custom wave setups (`add wave`) to run without system faults.
 
-### Processing Execution Mode Switches (Mutually Exclusive)
+## **4\. Command Line Option Reference**
 
-* **`--build`**: Initializes the workspace, generates clock networks, binds hardware constraints, runs synthesis, implements layout routing, and exports final application programming bitstreams. This is the implicit default option.  
-* **`--program`**: Executes a comprehensive system `--build` cycle, and immediately launches Microchip FlashPro over JTAG links to erase, verify, and write bitstream data blocks to the physical device.  
-* **`--sim`**: Halts the physical toolchain processing loop after project and clock configuration generation to run direct behavioral simulations inside QuestaSim/ModelSim.
+| Parameter Flag | Description | Default Value |
+| ----- | ----- | ----- |
+| `--family` | **Required.** Targets the silicon architecture. Must be `smartfusion2`, `rtg4`, or `polarfire`. | *None* |
+| `--build` | Initiates Libero synthesis, layout, and programming exports. | `True` (if no other mode selected) |
+| `--sim` | Initiates database collection and launches the simulator. | `False` |
+| `--program` | Performs a full build, then attempts to flash the device via FlashPro. | `False` |
+| `--sim_time` | Total simulation execution time. | `1000ns` |
+| `--tb_top` | The top-level module name representing the simulation wrapper. | `tb_fpga_top_v3` |
+| `--design_tcl` | Sourced IP build script name expected in the TCL directories. | `FDDRC_With_INIT_recursive.tcl` |
+| `--console` | Launches Questasim cleanly in text-only console shell. | `False` (GUI by default) |
+| `--vcd` | Dumps wave traces to a standard `.vcd` file in the sim directory. | `False` |
+| `--libero_path` | Path or environment alias pointing to your Libero binary. | `libero` |
+| `--modelsim_path` | Path or environment alias pointing to your `vsim` executable. | `vsim` |
+| `--precompiled_base` | Directory path mapping precompiled device libraries. | `/opt/microchip/.../vlog` |
 
-### Simulation Configuration Arguments (Optional Overrides)
+## **5\. Practical Execution Examples**
 
-* **`--sim_time <string>`**: Total simulation execution length tracking metrics (e.g., `20ms`, `500us`, `2000ns`). *Default: `1000ns`*.  
-* **`--tb_top <string>`**: Name identifier mapping the exact root Verilog simulation testbench module. *Default: `tb_fpga_top_v3`*.  
-* **`--console`**: Forces simulation processing headlessly into text-only mode inside the console (`-c -batch`), streaming log outputs straight to your active shell interface.  
-* **`--vcd`**: Injects automated Value Change Dump (`.vcd`) instruction sets into the initialization script layout to dump signal transitions.
+### **Example A: Run Complete RTL-to-Bitstream Hardware Compilation (RTG4)**
 
-### Toolchain Directory Path Overrides (Optional Overrides)
-
-* **`--libero_path <path>`**: Command string override to map custom Libero installation nodes. \*Default: `libero`  
-* **`--modelsim_path <path>`**: Command string override to map custom ModelSim/Questa `vsim` installation nodes. *Default: `vsim`*.  
-* **`--precompiled_base <path>`**: Absolute system path tracker specifying where vendor compiled primitives live. *Default: `/opt/microchip/Libero_SoC_2025.2/.../vlog`*.
-
-## 🏁 Step-by-Step Execution Scenarios
-
-#### Scenario 1: Full Hardware Compilation (`--build`)
-
-This mode executes headless project creation, imports synthesizable code blocks, instantiates the hardware clock conditioning infrastructure core (FCCC), maps constraint rules, and runs the entire physical implementation layout down to final fabrication bitstream packages.
-
-Bash
-
-```
-python3 build.py --family smartfusion2 --build
-```
-
-**Expected Console Logging Trace:**
-
-Plaintext
+This compiles your physical code, sources target-specific configurations under `src/tcl/rtg4`, and writes out programming files.
 
 ```
-[CLEANUP] Purging previous Libero Project [SMARTFUSION2] workspace tree: ./build/smartfusion2/top
-[INFO] Initializing Libero Core Database for SMARTFUSION2 system configurations...
-[INFO] Launching Libero SoC Database Engine for SMARTFUSION2...
-... (Libero Synthesis & Place & Route Log Output) ...
-[SUCCESS] Hardware design build compilation successfully finished for target family: smartfusion2.
+python3 build.py --family rtg4 --build
 ```
 
-#### Scenario 2: Automated Physical Hardware Flashing (`--program`)
+### **Example B: Run Behavioral Simulation in GUI Mode (PolarFire)**
 
-This configuration builds on top of a full hardware compilation pass by instructing Libero to launch the physical programming hardware (FlashPro tool stack) over connected debug probes to instantly flash the silicon device fabric.
-
-Bash
+Instantiates the database and launches QuestaSim Pro's GUI interface with loaded waveform views.
 
 ```
-python3 build.py --family smartfusion2 --program
+python3 build.py --family polarfire --sim --tb_top tb_top_axi --sim_time 10us
 ```
 
-**Expected Application Output Execution Block:**
+### **Example C: Run Interactive Headless Text-Only Simulation (SmartFusion2)**
 
-Plaintext
-
-```
-[CLEANUP] Purging previous Libero Project [SMARTFUSION2] workspace tree: ./build/smartfusion2/top
-[INFO] Initializing Libero Core Database for SMARTFUSION2...
-... (Libero full pipeline runs up to bitstream generation) ...
-Info: Running PROGRAMDEVICE tool...
-Info: FlashPro connection established.
-Erasing device array... [cite: 27]
-Info: Writing FPGA fabric array... [cite: 27]
-Info: Verification cycle passed. Programming Succeeded. [cite: 27]
-```
-
-#### Scenario 3: Interactive Graphical Waveform Simulation (`--sim`)
-
-This configuration sets up the baseline project environment, links your custom clocks, and handles workspace setup. It then copies required data blocks and initializes the ModelSim/Questa Graphical User Interface (GUI), setting up standard wave tracking blocks automatically.
-
-Bash
+Forces compilation and checks results instantly inside the terminal shell window.
 
 ```
-python3 build.py --family smartfusion2 --sim --sim_time 15us --tb_top tb_fpga_top_v3
+python3 build.py --family smartfusion2 --sim --console --sim_time 500ns
 ```
 
-**Generated Macro Script (`build/smartfusion2/sim/run.do`):**
+## **6\. Expected Console Outputs**
 
-Tcl
+### **Successful Hardware Build Run (`--build`)**
 
-```
-quietly set ACTELLIBNAME SmartFusion2
-quietly set PROJECT_DIR "/home/user/project/build/smartfusion2/top"
-if {[file exists presynth/_info]} {
-   echo "INFO: Simulation library presynth already exists"
-} else {
-   file delete -force presynth 
-   vlib presynth
-}
-vmap presynth presynth
-vmap SmartFusion2 "/opt/microchip/Libero_SoC_2025.2/Libero_SoC/Designer/lib/modelsimpro/precompiled/vlog/smartfusion2"
-vlog -sv -work presynth "${PROJECT_DIR}/component/work/FCCC_C0/FCCC_C0_0/FCCC_C0_FCCC_C0_0_FCCC.v"
-vlog -sv -work presynth "${PROJECT_DIR}/component/work/FCCC_C0/FCCC_C0.v"
-vlog -sv -work presynth "${PROJECT_DIR}/hdl/axi_if.v"
-vlog -sv -work presynth "${PROJECT_DIR}/hdl/uart_rx.v"
-vlog -sv -work presynth "${PROJECT_DIR}/hdl/fpga_top.v"
-vlog "+incdir+${PROJECT_DIR}/stimulus" -sv -work presynth "${PROJECT_DIR}/stimulus/fpga_top_tb.v"
-
-vsim -voptargs="+acc" -L SmartFusion2 -L presynth -t 1fs presynth.tb_fpga_top_v3
-add wave /tb_fpga_top_v3/*
-run 15us
-```
-
-#### Scenario 4: Headless Text-Only Console Simulation (`--sim --console`)
-
-Perfect for high-speed continuous integration pipeline scripts or terminal-only environments. This setup executes simulations entirely headlessly using the text terminal stream parameters (`-c -batch`), printing `$display` readouts right inside your active console shell.
-
-Bash
+Running the compilation yields clean logging, starting with database checks, and proceeding through constraint mapping up to file exports:
 
 ```
-python3 build.py --family smartfusion2 --sim --sim_time 500ns --tb_top tb_fpga_top_v3 --console
+[CLEANUP] Purging previous Libero Project [RTG4] workspace tree: /home/user/axi-interface/build/rtg4/top
+[CLEANUP] Stale Libero Project [RTG4] workspace removed successfully.
+[INFO] Sourcing target-specific custom IP/Sub-system design script by default: rtg4/FDDRC_With_INIT_recursive.tcl
+[INFO] Launching Libero SoC Database Engine for RTG4...
+
+Executing Tcl commands...
+--------------------------------------------------
+- Initializing sandboxed project: build/rtg4/top...
+- Importing Design RTL from src/hdl...
+- Importing Timing and Placement Constraints...
+- Sourcing custom DDR layout script...
+- Linking constraint tools...
+- Running synthesis...
+- Running Place & Route...
+- Exporting trusted facility programming file: build/rtg4/top/designer/top/export/top.job
+--------------------------------------------------
+
+[SUCCESS] Hardware design build compilation successfully finished for target family: rtg4.
 ```
 
-**Expected Console Logging Trace:**
+### **Successful Simulation Launch (`--sim`)**
 
-Plaintext
-
-```
-[CLEANUP] Purging previous QuestaSim Engine workspace tree: ./build/smartfusion2/sim
-[INFO] Launching Libero SoC Database Engine...
-... (Libero generates required clock models and project structures) ...
-[INFO] Standalone project-linked macro written to: ./build/smartfusion2/sim/run.do
-[INFO] Launching ModelSim Engine Wrapper Axis inside: ./build/smartfusion2/sim
-Reading run.do
-# Map presynth to presynth library data structures
-# Loading sv_std.std
-# Loading presynth.tb_fpga_top_v3
-# Loading SmartFusion2.CCC(fast)
-# Loading SmartFusion2.CLKINT(fast)
-# [UART_TX_LOG] Initializing transmitter block... Clock speed set to 80MHz. 
-# [SYSTEM_CONTROL] Reset state de-asserted safely at timestamp: 45000fs. [cite: 33]
-# [AXI_RAM_TEST] Core write handshake cycle verified successfully. [cite: 33]
-# Simulation reached target limit threshold window. Automated termination triggered. [cite: 34]
-```
-
-#### Scenario 5: Console Simulation with VCD Waveform Dumps (`--sim --console --vcd`)
-
-This setup combines headless command-line text execution with comprehensive automated waveform signal tracking. It dumps every data change across all design blocks directly into an independent, industry-standard Value Change Dump (`.vcd`) wave layout file.
-
-Bash
+Running the simulator outputs your mapped dependencies, builds compile databases inside the sandbox, and launches the simulator:
 
 ```
-python3 build.py --family smartfusion2 --sim --sim_time 20ms --tb_top tb_fpga_top_v3 --console --vcd
+[CLEANUP] Purging previous Libero Project [RTG4] workspace tree: /home/user/axi-interface/build/rtg4/top
+[CLEANUP] Stale Libero Project [RTG4] workspace removed successfully.
+[CLEANUP] Purging previous QuestaSim Engine workspace tree: /home/user/axi-interface/build/rtg4/sim
+[CLEANUP] Stale QuestaSim Engine workspace removed successfully.
+[INFO] Sourcing target-specific custom IP/Sub-system design script by default: rtg4/FDDRC_With_INIT_recursive.tcl
+[INFO] Launching Libero SoC Database Engine for RTG4...
+...[Libero generates components and files]...
+
+[INFO] Standalone project-linked macro written to: /home/user/axi-interface/build/rtg4/sim/run.do
+[INFO] Launching ModelSim Engine Wrapper Axis inside: /home/user/axi-interface/build/rtg4/sim
+
+QuestaSim Pro Microchip Edition-64 vmap 2024.3 Lib Mapping Utility 2024.09 Sep 10 2024
+vmap presynth presynth 
+Modifying /home/user/axi-interface/build/rtg4/sim/modelsim.ini
+
+vmap RTG4 /opt/microchip/Libero_SoC_2025.2/Libero_SoC/Designer/lib/modelsimpro/precompiled/vlog/rtg4 
+Modifying /home/user/axi-interface/build/rtg4/sim/modelsim.ini
+
+# Compile Generated SmartDesign / Core IP Components (Bottom-Up)
+vlog -sv -work presynth "$PROJECT_DIR/component/work/FCCC_C0/FCCC_C0_0/FCCC_C0_FCCC_C0_0_RTG4FCCC.v"
+-- Compiling module FCCC_C0_FCCC_C0_0_RTG4FCCC
+vlog -sv -work presynth "$PROJECT_DIR/component/work/FCCC_C0/FCCC_C0.v"
+-- Compiling module FCCC_C0
+
+# Compile Project HDL Source Files
+vlog -sv -work presynth "$PROJECT_DIR/hdl/axi_master_if.v"
+-- Compiling module axi4_master_if
+vlog -sv -work presynth "$PROJECT_DIR/hdl/fpga_top.v"
+-- Compiling module top
+
+# Compile Project Testbench Files
+vlog "+incdir+$PROJECT_DIR/stimulus" -sv -work presynth "$PROJECT_DIR/stimulus/tb_top_axi.v"
+-- Compiling module tb_top_axi
+
+vsim -voptargs="+acc" -L RTG4 -L presynth -t 1ps -gRAM_ES_BEHAVIOR=1 presynth.tb_top_axi
+Loading work.tb_top_axi(fast)
+Loading work.top(fast)
+Loading work.FCCC_C0(fast)
+Loading work.FCCC_C0_FCCC_C0_0_RTG4FCCC(fast)
+Loading RTG4.CCC_PLL(fast)
+Loading RTG4.AutoReset_PLL(fast)
+Loading work.axi4_master_if(fast)
+...
+Elaboration Successful. Launching user environment...
 ```
 
-**Generated Macro Script Execution Strategy (`build/smartfusion2/sim/run.do`):**
+## **7\. Troubleshooting Simulation Errors**
 
-Tcl
+#### **Issue 1: `Error loading design` / `Module 'XYZ' is not defined`**
 
-```
-onerror {quit -force}
-onbreak {quit -force}
-... (Library Mappings & Source Compilation Blocks) ...
-vsim -voptargs="+acc" -L SmartFusion2 -L presynth -t 1fs presynth.tb_fpga_top_v3
-vcd file tb_fpga_top_v3.vcd
-vcd add -r /tb_fpga_top_v3/*
-log -r /*
-run 20ms
-quit -force
-```
+* **Cause:** QuestaSim timing resolution was mismatching with precompiled models, or a standard IP was compiled double into the target environment.  
+* **Correction:** Ensure your script is updated to the latest revision, check that the precompiled path directory points to a valid `/vlog/rtg4` target, and verify that the target directory `build/rtg4/sim/` is mapping files cleanly during run initialization.
 
-💡 **Note:** Your structural waveform trace details will generate cleanly inside the local directory path: `./build/smartfusion2/sim/tb_fpga_top_v3.vcd`.
+#### **Issue 2: QuestaSim launches but the window closes instantly**
 
-## 🛡️ Built-in Safety Infrastructure & Fail-Fast Mechanics
-
-The automation framework incorporates defensive programming checks to prevent stale builds, hanging processes, or hidden design errors:
-
-* **Fail-Fast Constraint Checks:** Rather than letting the compilation fail hours later during layout, the script scans the `src/` directory beforehand. If `top_io.pdc`, `top_fp.pdc`, or `top.sdc` are missing, it stops immediately.  
-* **Bottom-Up Compilation Trees:** The framework automatically ensures that top-level module architectures (`top.v` or `fpga_top.v`) are shifted to the absolute tail end of the compiler array, ensuring parent instances resolve cleanly.  
-* **Visibility Preservation Under Optimization Pass:** The simulator execution commands pass explicit `-voptargs="+acc"` override strings under all run conditions. This instructs the optimizer (`vopt`) to preserve internal net names, preventing object errors like: `No objects found matching '/*'`..  
-* **Non-Interactive Crash-Abort Trapping Engine:** When running in console mode, the macro injects explicit `onerror {quit -force}` instructions. If a compilation error or syntax break occurs, the process exits cleanly back to the terminal with a non-zero exit status instead of hanging in the background or stalling your CI/CD pipelines.
-
-## 🔍 Troubleshooting Common Toolchain Failures
-
-### 1\. File Not Found Error (`vlog-7 ENOENT`)
-
-* **Symptom:** Simulator aborts on instructions with errors matching: `Failed to open design unit file... in read mode`.  
-* **Root Cause:** Passing stimulus testbenches directly from the raw `src/` directory into headless simulators causes path mismatch breaks. Libero doesn't physically copy simulation models into its local directory database until the GUI is opened manually.  
-* **Resolution:** Covered automatically by this pipeline framework. The script forces Libero to execute project instantiation first, which copies all hardware sources and stimulus testbenches. The Python script then scans Libero's local project workspace directory (`build/<target_family>/top/`) to dynamically build your macro script.
-
-### 2\. Invalid Command Name Errors inside Libero
-
-* **Symptom:** Libero project setups crash out with errors matching: `invalid command name "set_simulation_options"`.  
-* **Root Cause:** Trying to pass simulation configurations through outdated global Tcl command lines inside headless project setups throws fatal tool execution breaks.  
-* **Resolution:** Removed from the Libero project generation pass. All simulation runtime controls are managed directly via the `run $sim_time` macro lines inside the dedicated `build/<target_family>/sim/` simulation sandbox workspace.
-
-## 📝 File Management Script
-
-To save this document programmatically as `USAGE_GUIDE.md` from your workspace directory, run this Python block:
-
-Python
-
-```
-with open("USAGE_GUIDE.md", "w") as f:
-    f.write(usage_guide_content)
-
-print("USAGE_GUIDE.md generated successfully.")
-```
-
-### **Key Contents Summary:**
-
-* **Prerequisites Validation:** Clear instructions for environment setups covering required paths, environment strings, and precompiled vendor hardware primitives (`vlog`).  
-* **Sandboxed Directory Architecture Layout:** A structural breakdown showing the physical isolation between the synthesizable hardware core engine files (`build/<target_family>/top/`) and the isolated verification simulator playground (`build/<target_family>/sim/`).  
-* **CLI Parameter Matrix:** A comprehensive lookup reference detailing target boundaries, argument constraints, choices, flag behaviors, and structural defaults.  
-* **5 Practical Copy-Paste Recipes:** Complete walkthroughs with realistic console traces and output results for every major mode—including full hardware compilations , physical automated device flashing , graphical wave viewers , pure terminal console logging streams , and automated Value Change Dump (`.vcd`) waveform profiles.  
-   TXT  
-* **Built-in Safety & Troubleshooting:** Automated defense strategies deployed by the script to safeguard your workflow.  
-   TXT
+* **Cause:** Running with CLI configuration commands in GUI launch context.  
+* **Correction:** Do not pass the `--console` flag if you want to inspect waves graphically. The script natively opens the full interactive graphical waveform user interface by default.
 

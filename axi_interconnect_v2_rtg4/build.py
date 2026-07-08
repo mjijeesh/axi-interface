@@ -268,10 +268,12 @@ def generate_modelsim_macro(target, hdl_files, proj_stim_dir, build_dir, tb_top,
     
     proj_dir_abs = os.path.abspath(os.path.join(build_dir, target, "top")).replace(os.sep, "/")
     precompiled_base_clean = precompiled_base.replace(os.sep, "/")
+    sim_workspace_dir_abs = os.path.abspath(os.path.join(build_dir, target, "sim")).replace(os.sep, "/")
     
     error_trapping = "onerror {quit -force}\nonbreak {quit -force}\n" if console_mode else ""
 
-    do_content = f"""{error_trapping}quietly set ACTELLIBNAME {cfg['lib_name']}
+    do_content = f"""{error_trapping}cd "{sim_workspace_dir_abs}"
+quietly set ACTELLIBNAME {cfg['lib_name']}
 quietly set PROJECT_DIR "{proj_dir_abs}"
 
 if {{[file exists presynth/_info]}} {{
@@ -339,7 +341,9 @@ def run_modelsim(modelsim_path, do_file_path, console_mode, sim_workspace_dir):
     if console_mode:
         sim_cmd = [modelsim_path, "-c", "-batch", "-do", do_file_path]
     else:
-        sim_cmd = [modelsim_path, "-do", do_file_path]
+        # Added -gui parameter to ensure Questasim starts up its full graphical environment
+        # instead of launching in console-shell mode which blocks GUI macro operations like "add wave".
+        sim_cmd = [modelsim_path, "-gui", "-do", do_file_path]
         
     try:
         subprocess.run(sim_cmd, check=True, cwd=sim_workspace_dir)
