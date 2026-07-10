@@ -1,4 +1,4 @@
-v4: RTG4  DDR3 test design with east and west DDR memroy
+## v4: RTG4  DDR3 test design with east and west DDR memroy
 
 This demo design has two ddr3 controllers, for west ddr3 and east ddr3. 
 the axilsram memory is removed.
