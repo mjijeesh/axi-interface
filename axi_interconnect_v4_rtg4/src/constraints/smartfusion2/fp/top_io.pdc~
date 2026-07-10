@@ -1,0 +1,99 @@
+#
+
+# 
+# User Locked I/O Bank Settings
+# 
+
+#set_iobank Bank4      \
+    -vcci 3.30        \
+    -fixed yes        \
+    -updateiostd yes
+
+
+# 
+# Unlocked I/O Bank Settings
+# The I/O Bank Settings can be locked by directly editing this file
+# or by making changes in the I/O Attribute Editor
+# 
+
+
+# 
+# User Locked I/O settings
+# 
+
+#set_io LOCK_RST_N      \
+    -pinname R36       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+#set_io READ            \
+    -pinname V34       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+    
+set_io clk_50mhz             \
+    -pinname H16      \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION INPUT
+
+set_io board_rst             \
+    -pinname H12      \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION INPUT
+
+    
+
+set_io rx_serial             \
+    -pinname H3      \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION INPUT
+
+
+set_io tx_serial              \
+    -pinname G3       \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+
+#set_io UART_TEST1      \
+    -pinname W34       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+#set_io UART_TEST2      \
+    -pinname W35       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+#set_io WRITE           \
+    -pinname V33       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+#set_io {init_done[0]}  \
+    -pinname U35       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+
+# 
+# Dedicated Peripheral I/O Settings
+# 
+
+
+# 
+# Unlocked I/O settings
+# The I/Os in this section are unplaced or placed but are not locked
+# the other listed attributes have been applied
+# 
+
