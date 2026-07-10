@@ -6,17 +6,17 @@ Sam memory map is used for the simualtion.
 
 usage examples:
 
-### create a clean project and simulate
+create a clean project and simulate
 
-python3 build.py --family rtg4 --sim --tb_top tb_top_axi_ddr3 --sim_time 1ms --console --clean
+```python3 build.py --family rtg4 --sim --tb_top tb_top_axi_ddr3 --sim_time 1ms --console --clean```
 
-** simulate an existing project 
+simulate an existing project 
 
-python3 build.py --family rtg4 --sim --tb_top tb_top_axi_ddr3 --sim_time 1ms --console 
+`python3 build.py --family rtg4 --sim --tb_top tb_top_axi_ddr3 --sim_time 1ms --console `
 
-** simulate in gui mode 
+simulate in gui mode 
 
-python3 build.py --family rtg4 --sim --tb_top tb_top_axi_ddr3 --sim_time 1ms --gui
+`python3 build.py --family rtg4 --sim --tb_top tb_top_axi_ddr3 --sim_time 1ms --gui`
 
 10th july 2026
 
