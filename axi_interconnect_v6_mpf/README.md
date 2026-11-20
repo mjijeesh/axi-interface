@@ -85,25 +85,151 @@ Info: 'PF_CCC_C0' was successfully generated.
 [INFO] Restructuring macro profile 'run.do' for optimized interactive run (10ms)...
 [INFO] Handing off control to ModelSim Live Console Shell environment...
 
-=========================================================
-   LAUNCHING MULTI-BURST AXI4 MEMORY REGRESSION SWEEPS   
-=========================================================
-[STATUS] Waiting for PF_CCC PLL lock and synchronized reset release...
-[STATUS] PLL locked and system reset released! Starting sweeps.
+# =========================================================
+#    LAUNCHING MULTI-BURST AXI4 MEMORY REGRESSION SWEEPS   
+# =========================================================
+# [STATUS] Waiting for PF_CCC PLL lock and synchronized reset release...
+# [STATUS] PLL locked and system reset released! Starting sweeps.
+# 
+# ---------------------------------------------------------
+#  PHASE 1: SLAVE 0 (64-BIT) SINGLE & MULTI-BURST SWEEPS   
+# ---------------------------------------------------------
+# [MATRIX SWEEP] Addr: 0x60001000 | Words: 1 (8 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60001000 | Data: 0xc001a00100000000
+#   [PASS] All 1 words (8 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60002400 | Words: 4 (32 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60002400 | Data: 0xbeef000400000000
+#   [MATCH] Word     1 | AXI Addr: 0x60002408 | Data: 0xbeef000400000001
+#   [MATCH] Word     2 | AXI Addr: 0x60002410 | Data: 0xbeef000400000002
+#   [MATCH] Word     3 | AXI Addr: 0x60002418 | Data: 0xbeef000400000003
+#   [PASS] All 4 words (32 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60003000 | Words: 13 (104 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60003000 | Data: 0x7777d11100000000
+#   [MATCH] Word     1 | AXI Addr: 0x60003008 | Data: 0x7777d11100000001
+#   [MATCH] Word     2 | AXI Addr: 0x60003010 | Data: 0x7777d11100000002
+#   [MATCH] Word     3 | AXI Addr: 0x60003018 | Data: 0x7777d11100000003
+#   [MATCH] Word     4 | AXI Addr: 0x60003020 | Data: 0x7777d11100000004
+#   [MATCH] Word     5 | AXI Addr: 0x60003028 | Data: 0x7777d11100000005
+#   [MATCH] Word     6 | AXI Addr: 0x60003030 | Data: 0x7777d11100000006
+#   [MATCH] Word     7 | AXI Addr: 0x60003038 | Data: 0x7777d11100000007
+#   [MATCH] Word     8 | AXI Addr: 0x60003040 | Data: 0x7777d11100000008
+#   [MATCH] Word     9 | AXI Addr: 0x60003048 | Data: 0x7777d11100000009
+#   [MATCH] Word    10 | AXI Addr: 0x60003050 | Data: 0x7777d1110000000a
+#   [MATCH] Word    11 | AXI Addr: 0x60003058 | Data: 0x7777d1110000000b
+#   [MATCH] Word    12 | AXI Addr: 0x60003060 | Data: 0x7777d1110000000c
+#   [PASS] All 13 words (104 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60004500 | Words: 64 (512 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60004500 | Data: 0xdead006400000000
+#   [MATCH] Word     1 | AXI Addr: 0x60004508 | Data: 0xdead006400000001
+#   [MATCH] Word     2 | AXI Addr: 0x60004510 | Data: 0xdead006400000002
+#   [MATCH] Word    61 | AXI Addr: 0x600046e8 | Data: 0xdead00640000003d
+#   [MATCH] Word    62 | AXI Addr: 0x600046f0 | Data: 0xdead00640000003e
+#   [MATCH] Word    63 | AXI Addr: 0x600046f8 | Data: 0xdead00640000003f
+#   [PASS] All 64 words (512 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60000000 | Words: 256 (2048 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60000000 | Data: 0x5555025600000000
+#   [MATCH] Word     1 | AXI Addr: 0x60000008 | Data: 0x5555025600000001
+#   [MATCH] Word     2 | AXI Addr: 0x60000010 | Data: 0x5555025600000002
+#   [MATCH] Word   253 | AXI Addr: 0x600007e8 | Data: 0x55550256000000fd
+#   [MATCH] Word   254 | AXI Addr: 0x600007f0 | Data: 0x55550256000000fe
+#   [MATCH] Word   255 | AXI Addr: 0x600007f8 | Data: 0x55550256000000ff
+#   [PASS] All 256 words (2048 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60000000 | Words: 512 (4096 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60000000 | Data: 0x4b00051200000000
+#   [MATCH] Word     1 | AXI Addr: 0x60000008 | Data: 0x4b00051200000001
+#   [MATCH] Word     2 | AXI Addr: 0x60000010 | Data: 0x4b00051200000002
+#   [MATCH] Word   509 | AXI Addr: 0x60000fe8 | Data: 0x4b000512000001fd
+#   [MATCH] Word   510 | AXI Addr: 0x60000ff0 | Data: 0x4b000512000001fe
+#   [MATCH] Word   511 | AXI Addr: 0x60000ff8 | Data: 0x4b000512000001ff
+#   [PASS] All 512 words (4096 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60000e00 | Words: 600 (4800 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60000e00 | Data: 0xb0d0060000000000
+#   [MATCH] Word     1 | AXI Addr: 0x60000e08 | Data: 0xb0d0060000000001
+#   [MATCH] Word     2 | AXI Addr: 0x60000e10 | Data: 0xb0d0060000000002
+#   [MATCH] Word   597 | AXI Addr: 0x600020a8 | Data: 0xb0d0060000000255
+#   [MATCH] Word   598 | AXI Addr: 0x600020b0 | Data: 0xb0d0060000000256
+#   [MATCH] Word   599 | AXI Addr: 0x600020b8 | Data: 0xb0d0060000000257
+#   [PASS] All 600 words (4800 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60000000 | Words: 4096 (32768 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60000000 | Data: 0x320b409600000000
+#   [MATCH] Word     1 | AXI Addr: 0x60000008 | Data: 0x320b409600000001
+#   [MATCH] Word     2 | AXI Addr: 0x60000010 | Data: 0x320b409600000002
+#   [MATCH] Word  4093 | AXI Addr: 0x60007fe8 | Data: 0x320b409600000ffd
+#   [MATCH] Word  4094 | AXI Addr: 0x60007ff0 | Data: 0x320b409600000ffe
+#   [MATCH] Word  4095 | AXI Addr: 0x60007ff8 | Data: 0x320b409600000fff
+#   [PASS] All 4096 words (32768 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x60000000 | Words: 12800 (102400 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x60000000 | Data: 0x100cc80000000000
+#   [MATCH] Word     1 | AXI Addr: 0x60000008 | Data: 0x100cc80000000001
+#   [MATCH] Word     2 | AXI Addr: 0x60000010 | Data: 0x100cc80000000002
+#   [MATCH] Word 12797 | AXI Addr: 0x60018fe8 | Data: 0x100cc800000031fd
+#   [MATCH] Word 12798 | AXI Addr: 0x60018ff0 | Data: 0x100cc800000031fe
+#   [MATCH] Word 12799 | AXI Addr: 0x60018ff8 | Data: 0x100cc800000031ff
+#   [PASS] All 12800 words (102400 Bytes) verified cleanly.
+# 
+# ---------------------------------------------------------
+#  PHASE 2: SLAVE 1 (32-BIT DWC) SINGLE & MULTI-BURST SWEEPS
+# ---------------------------------------------------------
+# [MATRIX SWEEP] Addr: 0x80000000 | Words: 1 (8 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x80000000 | Data: 0xc002b00200000000
+#   [PASS] All 1 words (8 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x80001000 | Words: 8 (64 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x80001000 | Data: 0xa5a5000800000000
+#   [MATCH] Word     1 | AXI Addr: 0x80001008 | Data: 0xa5a5000800000001
+#   [MATCH] Word     2 | AXI Addr: 0x80001010 | Data: 0xa5a5000800000002
+#   [MATCH] Word     3 | AXI Addr: 0x80001018 | Data: 0xa5a5000800000003
+#   [MATCH] Word     4 | AXI Addr: 0x80001020 | Data: 0xa5a5000800000004
+#   [MATCH] Word     5 | AXI Addr: 0x80001028 | Data: 0xa5a5000800000005
+#   [MATCH] Word     6 | AXI Addr: 0x80001030 | Data: 0xa5a5000800000006
+#   [MATCH] Word     7 | AXI Addr: 0x80001038 | Data: 0xa5a5000800000007
+#   [PASS] All 8 words (64 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x80004200 | Words: 32 (256 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x80004200 | Data: 0xb4b4003200000000
+#   [MATCH] Word     1 | AXI Addr: 0x80004208 | Data: 0xb4b4003200000001
+#   [MATCH] Word     2 | AXI Addr: 0x80004210 | Data: 0xb4b4003200000002
+#   [MATCH] Word    29 | AXI Addr: 0x800042e8 | Data: 0xb4b400320000001d
+#   [MATCH] Word    30 | AXI Addr: 0x800042f0 | Data: 0xb4b400320000001e
+#   [MATCH] Word    31 | AXI Addr: 0x800042f8 | Data: 0xb4b400320000001f
+#   [PASS] All 32 words (256 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x80008000 | Words: 127 (1016 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x80008000 | Data: 0xecec012700000000
+#   [MATCH] Word     1 | AXI Addr: 0x80008008 | Data: 0xecec012700000001
+#   [MATCH] Word     2 | AXI Addr: 0x80008010 | Data: 0xecec012700000002
+#   [MATCH] Word   124 | AXI Addr: 0x800083e0 | Data: 0xecec01270000007c
+#   [MATCH] Word   125 | AXI Addr: 0x800083e8 | Data: 0xecec01270000007d
+#   [MATCH] Word   126 | AXI Addr: 0x800083f0 | Data: 0xecec01270000007e
+#   [PASS] All 127 words (1016 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x8000a000 | Words: 256 (2048 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x8000a000 | Data: 0x9999025600000000
+#   [MATCH] Word     1 | AXI Addr: 0x8000a008 | Data: 0x9999025600000001
+#   [MATCH] Word     2 | AXI Addr: 0x8000a010 | Data: 0x9999025600000002
+#   [MATCH] Word   253 | AXI Addr: 0x8000a7e8 | Data: 0x99990256000000fd
+#   [MATCH] Word   254 | AXI Addr: 0x8000a7f0 | Data: 0x99990256000000fe
+#   [MATCH] Word   255 | AXI Addr: 0x8000a7f8 | Data: 0x99990256000000ff
+#   [PASS] All 256 words (2048 Bytes) verified cleanly.
+# 
+# [MATRIX SWEEP] Addr: 0x80000000 | Words: 1024 (8192 Bytes)
+#   [MATCH] Word     0 | AXI Addr: 0x80000000 | Data: 0x8b00102400000000
+#   [MATCH] Word     1 | AXI Addr: 0x80000008 | Data: 0x8b00102400000001
+#   [MATCH] Word     2 | AXI Addr: 0x80000010 | Data: 0x8b00102400000002
+#   [MATCH] Word  1021 | AXI Addr: 0x80001fe8 | Data: 0x8b001024000003fd
+#   [MATCH] Word  1022 | AXI Addr: 0x80001ff0 | Data: 0x8b001024000003fe
+#   [MATCH] Word  1023 | AXI Addr: 0x80001ff8 | Data: 0x8b001024000003ff
+#   [PASS] All 1024 words (8192 Bytes) verified cleanly.
+# 
 
----------------------------------------------------------
- PHASE 1: SLAVE 0 (64-BIT) SINGLE & MULTI-BURST SWEEPS   
----------------------------------------------------------
-[MATRIX SWEEP] Addr: 0x60000000 | Words: 256 (2048 Bytes)
-  [MATCH] Word 00000 | AXI Addr: 0x60000000 | Data: 0x5555025600000000
-  [PASS] All 256 words (2048 Bytes) verified cleanly.
-...
-[MATRIX SWEEP] Addr: 0x60000000 | Words: 12800 (102400 Bytes)
-  [PASS] All 12800 words (102400 Bytes) verified cleanly.
-...
-=========================================================
-   ALL MULTI-BURST (UP TO 200 KB) SWEEPS PASSED!         
-=========================================================
 ```
 
 **Step 2: Incremental Console Simulation**
