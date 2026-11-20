@@ -2,8 +2,7 @@
 """
 Microchip Libero SoC & ModelSim Master Automation Pipeline Tool
 =============================================================================
-Company/Institution:  Tecnomic Components / Creative System Labs
-Engineer:             Automated Flow Engine
+Company:  Tecnomic Components 
 Year:                 2026
 
 File Revision History:

@@ -1,0 +1,103 @@
+# Ethernet pins are connected to the Bank 4 
+#set_iobank -bank_name Bank4  \
+    -vcci 2.50               \
+    -fixed true
+
+
+
+set_io -port_name RX_N_0  \
+    -pin_name U1        \
+    -fixed true         \
+    -io_std LVDS25      \
+    -DIRECTION INPUT
+
+
+set_io -port_name RX_P_0  \
+    -pin_name U2        \
+    -fixed true         \
+    -io_std LVDS25      \
+    -DIRECTION INPUT
+
+set_io -port_name TX_N_0  \
+    -pin_name V2        \
+    -fixed true         \
+    -io_std LVDS25      \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name TX_P_0  \
+    -pin_name V1        \
+    -fixed true         \
+    -io_std LVDS25      \
+    -DIRECTION OUTPUT    
+    
+    
+set_io -port_name REFCLK_N  \
+    -pin_name U5            \
+    -fixed true             \
+    -io_std LVDS25          \
+    -DIRECTION INPUT
+
+
+set_io -port_name REFCLK_P  \
+    -pin_name U4            \
+    -fixed true             \
+    -io_std LVDS25          \
+    -DIRECTION INPUT
+    
+    
+    
+    
+
+set_io -port_name coma_mode  \
+    -pin_name U12            \
+    -fixed true              \
+    -io_std LVCMOS25         \
+    -DIRECTION OUTPUT
+    
+
+
+set_io -port_name PHY_MDC  \
+    -pin_name Y12          \
+    -fixed true            \
+    -io_std LVCMOS25       \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name PHY_MDIO  \
+    -pin_name Y13           \
+    -fixed true             \
+    -io_std LVCMOS25        \
+    -DIRECTION INOUT
+
+
+set_io -port_name PHY_RST  \
+    -pin_name U11          \
+    -fixed true            \
+    -io_std LVCMOS25       \
+    -DIRECTION OUTPUT
+
+
+
+
+set_io -port_name REF_CLK_SEL  \
+    -pin_name AA10             \
+    -fixed true                \
+    -io_std LVCMOS25           \
+    -DIRECTION OUTPUT
+    
+
+
+# these pins are connected to bank 6
+#set_io -port_name LINK_OK  \
+    -pin_name D25          \
+    -fixed true            \
+    -io_std LVCMOS18           \
+    -DIRECTION OUTPUT
+
+#set_io -port_name RD_BC_ERROR  \
+    -pin_name F22              \
+    -fixed true                \
+    -io_std LVCMOS18           \
+    -DIRECTION OUTPUT
+

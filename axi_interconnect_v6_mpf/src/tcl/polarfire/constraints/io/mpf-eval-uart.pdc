@@ -1,0 +1,22 @@
+# Microsemi I/O Physical Design Constraints file
+
+# User I/O Constraints file 
+
+# UART signals are  connected to Bank6 
+
+
+set_io -port_name UART_RX  \
+    -pin_name H18     \
+    -fixed true       \
+    -io_std LVCMOS18  \
+    -DIRECTION INPUT
+
+
+
+set_io -port_name UART_TX   \
+    -pin_name G17      \
+    -fixed true        \
+    -io_std LVCMOS18  \
+    -DIRECTION OUTPUT
+
+
