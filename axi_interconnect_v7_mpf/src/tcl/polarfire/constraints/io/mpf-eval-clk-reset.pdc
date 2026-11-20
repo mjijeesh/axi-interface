@@ -1,0 +1,117 @@
+# Microsemi I/O Physical Design Constraints file
+
+# User I/O Constraints file 
+
+
+
+# Family: PolarFire , Die: MPF300T_ES , Package: FCG1152
+
+# Date generated: Fri Sep 28 16:36:17 2018 
+
+
+# 
+# User Locked I/O Bank Settings
+# 
+
+set_iobank -bank_name Bank4  \
+    -vcci 2.50               \
+    -fixed true
+
+set_iobank -bank_name Bank6  \
+    -vcci 1.80               \
+    -fixed true
+
+
+
+# All the GPIO and SPI , UART signals are connected to the Bank 6 which is 1.8V
+
+set_io -port_name REF_CLK_50MHZ  \
+    -pin_name E25            \
+    -fixed true              \
+    -DIRECTION INPUT
+    
+    
+set_io -port_name RESET_N  \
+    -pin_name K22          \
+    -fixed true            \
+    -DIRECTION INPUT
+
+
+
+
+
+
+# 
+# Dedicated Peripheral I/O Settings
+# 
+
+
+# 
+# Unlocked I/O settings
+# The I/Os in this section are unplaced or placed but are not locked
+# the other listed attributes have been applied
+# 
+
+
+#
+#Ports using Dedicated Pins
+
+#
+
+set_io -port_name PF_SPI_CLK  \
+    -pin_name L14      \
+    -DIRECTION INOUT
+
+
+set_io -port_name PF_SPI_DI  \
+    -pin_name K12     \
+    -DIRECTION INPUT
+
+
+set_io -port_name PF_SPI_DO   \
+    -pin_name K10      \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name PF_SPI_FLASH  \
+    -pin_name L13        \
+    -DIRECTION INPUT
+
+
+set_io -port_name PF_SPI_IFACE  \
+    -pin_name L12        \
+    -DIRECTION INPUT
+
+
+set_io -port_name PF_SPI_SS  \
+    -pin_name M14     \
+    -DIRECTION INOUT
+
+
+    
+    
+set_io -port_name TCK  \
+    -pin_name J10      \
+    -DIRECTION INPUT
+
+
+set_io -port_name TDI  \
+    -pin_name K11      \
+    -DIRECTION INPUT
+
+
+set_io -port_name TDO  \
+    -pin_name K9       \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name TMS  \
+    -pin_name J9       \
+    -DIRECTION INPUT
+
+
+set_io -port_name TRSTB  \
+    -pin_name N14        \
+    -DIRECTION INPUT
+
+

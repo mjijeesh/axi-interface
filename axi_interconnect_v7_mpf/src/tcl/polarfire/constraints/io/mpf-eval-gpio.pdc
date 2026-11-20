@@ -1,0 +1,62 @@
+# Microsemi I/O Physical Design Constraints file
+
+# User I/O Constraints file 
+
+
+
+set_io -port_name {GPIO_IN[4]}  \
+    -pin_name H23               \
+    -fixed true                 \
+    -io_std LVCMOS18            \
+    -DIRECTION INPUT
+
+
+set_io -port_name {GPIO_IN[5]}  \
+    -pin_name D21               \
+    -fixed true                 \
+    -io_std LVCMOS18            \
+    -DIRECTION INPUT
+
+
+set_io -port_name {GPIO_IN[6]}  \
+    -pin_name H24               \
+    -fixed true                 \
+    -io_std LVCMOS18            \
+    -DIRECTION INPUT
+
+
+set_io -port_name {GPIO_IN[7]}  \
+    -pin_name C22               \
+    -fixed true                 \
+    -io_std LVCMOS18            \
+    -DIRECTION INPUT
+
+
+set_io -port_name {GPIO_OUT[0]}  \
+    -pin_name C27                \
+    -fixed true                  \
+    -io_std LVCMOS18            \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name {GPIO_OUT[1]}  \
+    -pin_name F23                \
+    -fixed true                  \
+    -io_std LVCMOS18            \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name {GPIO_OUT[2]}  \
+    -pin_name H22                \
+    -fixed true                  \
+    -io_std LVCMOS18            \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name {GPIO_OUT[3]}  \
+    -pin_name H21                \
+    -fixed true                  \
+    -io_std LVCMOS18            \
+    -DIRECTION OUTPUT
+
+
