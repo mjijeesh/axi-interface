@@ -1,0 +1,35 @@
+# Microsemi I/O Physical Design Constraints file
+
+# User I/O Constraints file 
+
+# SPI  ouput signals are on Bank6 connected the Zl30364 clock device
+# this is needed if you use Gigabit Ethernet PHy
+
+
+set_io -port_name SPISCLKO  \
+    -pin_name K21           \
+    -fixed true             \
+    -io_std LVCMOS18        \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name SPISDI  \
+    -pin_name L20         \
+    -fixed true           \
+    -io_std LVCMOS18      \
+    -DIRECTION INPUT
+
+
+set_io -port_name SPISDO  \
+    -pin_name K20         \
+    -fixed true           \
+    -io_std LVCMOS18      \
+    -DIRECTION OUTPUT
+
+
+set_io -port_name SPISS  \
+    -pin_name J20        \
+    -fixed true          \
+    -io_std LVCMOS18     \
+    -DIRECTION OUTPUT
+

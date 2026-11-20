@@ -1,0 +1,9 @@
+# Microchip Technology Inc.
+# Date: 2026-Jul-03 12:23:07
+# This file was generated based on the following SDC source files:
+#   /home/jijeesh/git/axi-interface/impl_smartfusion2/component/work/FCCC_C0/FCCC_C0_0/FCCC_C0_FCCC_C0_0_FCCC.sdc
+# *** Any modifications to this file will be lost if derived constraints is re-run. ***
+#
+
+create_clock -name {clk_50mhz} -period 10 [ get_ports { clk_50mhz } ]
+create_generated_clock -name {pll_inst/FCCC_C0_0/GL0} -multiply_by 4 -divide_by 4 -source [ get_pins { pll_inst/FCCC_C0_0/CCC_INST/CLK0_PAD } ] -phase 0 [ get_pins { pll_inst/FCCC_C0_0/CCC_INST/GL0 } ]
